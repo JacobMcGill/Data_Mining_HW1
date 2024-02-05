@@ -4,8 +4,7 @@ author: "Daniel Oliner, Musab Alquwaee, Jacob McGill"
 output: md_document
 date: "2024-02-04"
 ---
-# ECO 395M HW 1: Daniel Oliner, Musab Alquwaee, Jacob McGill
-
+ECO 395M HW 1: Daniel Oliner, Musab Alquwaee, Jacob McGill
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -25,7 +24,7 @@ library(foreach)
 library(kknn)
 ```
 
-## Question 1
+# Question 1
 
 ```{r,include=FALSE}
 
@@ -71,7 +70,7 @@ significant_disruption_rate_by_carrier$SignificantDisruptionRate =
   (significant_disruption_rate_by_carrier$NumSignificantDisruption / significant_disruption_rate_by_carrier$TotalFlights) * 100
 ```
 
-### Data Visualization: Flights at ABIA
+## 1) Data Visualization: Flights at ABIA
 
 Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
 
@@ -108,9 +107,9 @@ ggplot(significant_disruption_rate_by_carrier, aes(x = reorder(UniqueCarrier, -S
 
 
 
-## Question 2
+# Question 2
 
-### 2A) 95th Percentile of Heights for Female Athletics Competitors 
+## 2A) 95th Percentile of Heights for Female Athletics Competitors 
 
 ```{r, echo=FALSE}
 olympics <- read.csv('C://Users/jacob/Downloads/olympics_top20.csv', header=TRUE)
@@ -119,7 +118,7 @@ athletics_q95_height <- quantile(olympics_athletics$height, 0.95, na.rm = TRUE)
 cat("The 95th percentile of heights for female competitors in Athletics events is:", athletics_q95_height, "centimeters\n")
 ```
 
-### 2B) Women's events with the greatest variability in competitor's heights across the entire history of the Olympics, as measured by the standard deviation?
+## 2B) Women's events with the greatest variability in competitor's heights across the entire history of the Olympics, as measured by the standard deviation?
 
 ```{r 3B, message=FALSE, echo=FALSE}
 
@@ -136,7 +135,7 @@ head(greateset_variability,1)
 
 
 
-### 2C) Average Age of Olympic Swimmers Over Time
+## 2C) Average Age of Olympic Swimmers Over Time
 
 ```{r, echo=FALSE, message= FALSE}
 olympics_swimming = olympics %>% filter(sport=="Swimming")
@@ -150,7 +149,7 @@ ggplot(average_age_swimming, aes(x = year, y = AvgAge, color = sex)) +
 cat("The plot illustrates how the average age of Olympic swimmers has changed over time, stratified by gender.")
 ```
 
-## Question 3
+# Question 3
 ```{r, include=FALSE}
 #Load in car data
 sclass = read.csv('C://Users/jacob/Downloads/sclass.csv', header=TRUE)
@@ -171,7 +170,7 @@ threefifty_cv_grid = foreach(k = threefifty_k_grid, .combine='rbind') %dopar% {
   c(k=k, err = mean(errs))
 } %>% as.data.frame
 ```
-### 350 Trim
+## 350 Trim
 To predict the price of a car with a 350 trim given its mileage using K-nearest neighbors, we first used K-fold cross validation to determine the K with the lowest average RMSE.
 
 
@@ -207,7 +206,7 @@ mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='purple',
 
 ```
 
-### AMG Trim
+## AMG Trim
 We can repeat this process for the AMG trim.
 
 ```{r, include = FALSE}
