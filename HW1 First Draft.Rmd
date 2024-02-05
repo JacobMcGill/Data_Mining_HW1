@@ -165,7 +165,7 @@ threefifty_k_grid = c(2, 3, 4, 5, 6, 7, 8,9,10, 11, 12, 15, 16, 17, 18, 19, 20, 
 threefifty_cv_grid = foreach(k = threefifty_k_grid, .combine='rbind') %dopar% {
   models = map(threefifty_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
   errs = map2_dbl(models, threefifty_folds$test, modelr::rmse)
-  c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
+  c(k=k, err = mean(errs))
 } %>% as.data.frame
 ```
 ##350 Trim
@@ -175,14 +175,16 @@ To predict the price of a car with a 350 trim given its mileage using K-nearest 
 ```{r, echo = FALSE}
 ggplot(threefifty_cv_grid) + 
   geom_line(aes(x=k, y=err)) + 
-  geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
-  scale_x_log10()
+  scale_x_log10() +
+  labs(title = "Average Estimated RMSE For Increasing K",
+       y = "Average Estimated RMSE",
+       x = "K")
 ```
 ```{r, echo=FALSE, error = FALSE}
-opt_err = cv_grid[which.min(cv_grid$err), ]
+opt_err = threefifty_cv_grid[which.min(threefifty_cv_grid$err), ]
 opt_k = opt_err[1,1]
 
-cat("The K with the lowest average RMSE in this model is", opt_k,". Looking at the ")
+cat("As can be seen above, the K with the lowest average RMSE in this model is", opt_k,". As this is the most optimal RMSE, we will then use it to model price given mileage. ")
 ```
 ```{r, include = FALSE}
 three_fifty_knn_opt = knnreg(price ~ mileage, k=opt_k, data = three_fiftys)
@@ -191,40 +193,44 @@ three_fiftys = three_fiftys %>%
 mileage_plot = ggplot(data = three_fiftys) +
   geom_point(aes(x=mileage, y = price), alpha = 0.2)
 ```
-
+The predicted values in this model 
 ```{r, echo = FALSE}
-#mileage_plot = ggplot(data = three_fiftys) +
- # geom_point(aes(x=mileage, y = price), alpha = 0.2) 
-  #ylim(7000, 20000) 
- # geom_line(x = mileage, y =three_fifty_predict,, color='red', size=1.5 )
-mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='red', size=1.5)
+mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='red', size=1.5) + 
+  labs( title = "Estimated Price Given Mileage vs. Actual Price",
+        y = "Price",
+        x = "Mileage")
 
 ```
 
+##AMG Trim
+We can repeat this process for the AMG trim.
+
 ```{r, include = FALSE}
-#Create training and test splits for both
+#Create folds for AMG
 AMG_K_folds = 10
 AMG_folds = crossv_kfold(AMG, k=AMG_K_folds)
-AMG_k_grid = c(2, 3, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 45,
-           50, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 70, 75, 80, 85, 90, 100, 125, 150, 175, 200, 250, 300)
-AMG_cv_grid = foreach(k = k_grid, .combine='rbind') %dopar% {
+AMG_k_grid = c(2, 3, 4, 6, 8, 10, 15, 20, 25, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 55, 60, 61, 62, 63, 64, 65, 70, 75, 80, 85, 90, 100, 125, 150, 175, 200, 250, 300)
+AMG_cv_grid = foreach(k = AMG_k_grid, .combine='rbind') %dopar% {
   models = map(AMG_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
   errs = map2_dbl(models, AMG_folds$test, modelr::rmse)
-  c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
+  c(k=k, err = mean(errs))
 } %>% as.data.frame
 ```
 
 ```{r, echo = FALSE}
 ggplot(AMG_cv_grid) + 
   geom_line(aes(x=k, y=err)) + 
-  geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
+  labs(title = "Average EstimatedRMSE For Increasing K",
+       y = "Average Estimated RMSE",
+       x="K") + 
   scale_x_log10()
 ```
 
 ```{r, include=TRUE}
 AMG_opt_err = AMG_cv_grid[which.min(AMG_cv_grid$err), ]
 AMG_opt_k = AMG_opt_err[1,1]
-AMG_opt_k
+
+cat("In this case, the K with the lowest average RMSE in this model is", AMG_opt_k,". We will then use it to model price given mileage for cars with an AMG trim. ")
 ```
 
 ```{r, include = FALSE}
@@ -237,26 +243,13 @@ AMG_mileage_plot = ggplot(data = AMG) +
 
 ```{r, echo = FALSE}
 
-AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='red', size=1.5)
+AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='red', size=1.5) +
+   labs( title = "Estimated Price Given Mileage vs. Actual Price",
+        y = "Price",
+        x = "Mileage")
+
 
 ```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r echo = FALSE}
+cat("The AMG trim has the greater optimal value of K, being" , AMG_opt_k,"versus the 350's optimal value of", opt_k, ". One potential explanation may be that there are more cars with an AMG trim, 1,413, compared to the 416 cars with a 350 trim. Since the 350 has less datapoints, it would take a relatively lower K to introduce greater bias into the model when compared to the AMG trim (since a greater K would 'cover' more datapoints). Balancing variance and bias in an optimal manner would then require choosing a smaller K compared to AMG, which has a greater amount of datapoints.")
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
