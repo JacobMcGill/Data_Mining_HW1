@@ -1,0 +1,195 @@
+---
+title: "HW1"
+output:
+  word_document: default
+  pdf_document: default
+date: "2024-01-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(mosaic)
+library(ggplot2)
+library(rsample)
+library(rsample)
+library(caret)
+library(modelr)
+library(parallel)
+library(foreach)
+library(kknn)
+```
+
+#Question 2
+
+```{r, include=FALSE}
+top_20 = read.csv('C://Users/jacob/Downloads/olympics_top20.csv', header=TRUE)
+```
+A)
+The 95th percentile for women's height across all Athletics 
+```{r}
+women_height_95pct = top_20 %>%
+  filter(sex == "F", sport == "Athletics") %>%
+  summarize(q95_height = quantile(height, 0.95))
+print(women_height_95pct)
+```
+
+B)  The womens' event with the largest variation in height is the Rowing Women's Coxed Fours, as seen below.
+
+```{r, include=FALSE}
+height_var = top_20 %>%
+  filter(sex == "F") %>%
+  group_by(event) %>%
+  summarize(height_variation = sd(height)) %>%
+  filter(height_variation != "NA") %>%
+  arrange(desc(height_variation))
+```
+
+```{r, include = TRUE}
+height_var %>%
+  head(1)
+```
+
+C) A graph of the change in age is show below
+```{r, include=TRUE}
+sum_age = top_20 %>%
+  filter(sport == "Swimming") %>%
+  group_by(year, sex) %>%
+  summarize(avg_age = mean(age))
+ggplot(sum_age, aes(x = year, y = avg_age, color = sex)) +
+  geom_line() +
+  labs(title = "Average Age by Gender Over the Years",
+       x = "Year",
+       y = "Average Age",
+       color = "Gender")
+```
+
+```{r}
+male_age = top_20 %>%
+  filter(sport == "Swimming" & sex == "M") %>%
+  group_by(year) %>%
+  summarize(avg_age = mean(age))
+female_age = top_20 %>%
+  filter(sport == "Swimming" & sex == "F") %>%
+  group_by(year) %>%
+  summarize(avg_age = mean(age))
+ggplot + geom_line()
+```
+
+```{r, include=FALSE}
+
+```
+# Question 3
+```{r, include=FALSE}
+sclass = read.csv('C://Users/jacob/Downloads/sclass.csv', header=TRUE)
+
+#Filter data into 350 and 63 AMG sets
+three_fiftys = sclass %>%
+  filter(trim == "350")
+AMG = sclass %>%
+  filter(trim == "63 AMG")
+#Create training and test splits for both
+three_fifty_split = initial_split(three_fiftys, prop=0.8)
+three_fifty_train = training(three_fifty_split)
+three_fifty_test = testing(three_fifty_split)
+K_folds = 10
+threefifty_folds = crossv_kfold(three_fiftys, k=K_folds)
+k_grid = c(2, 3, 4, 5, 6, 7, 8,9,10, 11, 12, 15, 16, 17, 18, 20, 22, 25, 27, 30, 32, 35, 37, 40, 45,
+           50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250, 300)
+cv_grid = foreach(k = k_grid, .combine='rbind') %dopar% {
+  models = map(threefifty_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
+  errs = map2_dbl(models, threefifty_folds$test, modelr::rmse)
+  c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
+} %>% as.data.frame
+```
+
+```{r, include = TRUE}
+ggplot(cv_grid) + 
+  geom_line(aes(x=k, y=err)) + 
+  geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
+  scale_x_log10()
+```
+```{r, include=TRUE, error = FALSE}
+opt_err = cv_grid[which.min(cv_grid$err), ]
+opt_k = opt_err[1,1]
+opt_k
+```
+```{r, include = FALSE}
+three_fifty_knn_opt = knnreg(price ~ mileage, k=opt_k, data = three_fiftys)
+three_fiftys = three_fiftys %>% 
+  mutate(three_fifty_pred = predict(three_fifty_knn_opt, three_fiftys))
+mileage_plot = ggplot(data = three_fiftys) +
+  geom_point(aes(x=mileage, y = price), alpha = 0.2)
+```
+
+```{r, include = TRUE}
+#mileage_plot = ggplot(data = three_fiftys) +
+ # geom_point(aes(x=mileage, y = price), alpha = 0.2) 
+  #ylim(7000, 20000) 
+ # geom_line(x = mileage, y =three_fifty_predict,, color='red', size=1.5 )
+mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='red', size=1.5)
+
+```
+
+```{r, include = FALSE}
+#Create training and test splits for both
+AMG_K_folds = 10
+AMG_folds = crossv_kfold(AMG, k=AMG_K_folds)
+AMG_k_grid = c(2, 3, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 45,
+           50, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 70, 75, 80, 85, 90, 100, 125, 150, 175, 200, 250, 300)
+AMG_cv_grid = foreach(k = k_grid, .combine='rbind') %dopar% {
+  models = map(AMG_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
+  errs = map2_dbl(models, AMG_folds$test, modelr::rmse)
+  c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
+} %>% as.data.frame
+```
+
+```{r, include = TRUE}
+ggplot(AMG_cv_grid) + 
+  geom_line(aes(x=k, y=err)) + 
+  geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
+  scale_x_log10()
+```
+
+```{r, include=TRUE}
+AMG_opt_err = AMG_cv_grid[which.min(AMG_cv_grid$err), ]
+AMG_opt_k = AMG_opt_err[1,1]
+AMG_opt_k
+```
+
+```{r, include = FALSE}
+AMG_knn_opt = knnreg(price ~ mileage, k=AMG_opt_k, data = AMG)
+AMG = AMG %>% 
+  mutate(AMG_pred = predict(AMG_knn_opt, AMG))
+AMG_mileage_plot = ggplot(data = AMG) +
+  geom_point(aes(x=mileage, y = price), alpha = 0.2)
+```
+
+```{r, include = TRUE}
+
+AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='red', size=1.5)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
