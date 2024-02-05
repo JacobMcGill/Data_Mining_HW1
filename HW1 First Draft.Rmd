@@ -71,6 +71,8 @@ significant_disruption_rate_by_carrier$SignificantDisruptionRate =
 
 ## 1) Data Visualization: Flights at ABIA
 
+Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
+
 ```{r, echo=FALSE}
 
 ggplot(aus_arrdelay_summary, aes(x = reorder(UniqueCarrier, -AvgArrDelay), y = AvgArrDelay)) +
@@ -89,7 +91,7 @@ ggplot(cancellation_rate_by_carrier, aes(x = reorder(UniqueCarrier, -Cancellatio
 
 ```
 
-# Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
+After defining a new variable for a "Signficant Disruption" that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS. 
 
 ```{r, echo=FALSE}
 
@@ -101,7 +103,6 @@ ggplot(significant_disruption_rate_by_carrier, aes(x = reorder(UniqueCarrier, -S
 
 ```
 
-# After defining a new variable for a "Signficant Disruption" that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS. 
 
 
 
@@ -135,7 +136,7 @@ head(greateset_variability,1)
 
 ## 2C) Average Age of Olympic Swimmers Over Time
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message= FALSE}
 olympics_swimming = olympics %>% filter(sport=="Swimming")
 average_age_swimming <- olympics_swimming %>% group_by(year, sex) %>% summarize(AvgAge = mean(age, na.rm = TRUE))
 ggplot(average_age_swimming, aes(x = year, y = AvgAge, color = sex)) +
@@ -169,7 +170,7 @@ threefifty_cv_grid = foreach(k = threefifty_k_grid, .combine='rbind') %dopar% {
 } %>% as.data.frame
 ```
 ## 350 Trim
-To predict the price of a car with a 350 trim given its mileage using K-nearest neighbors, we can first use K-fold cross validation to determine the K with the lowest average RMSE.
+To predict the price of a car with a 350 trim given its mileage using K-nearest neighbors, we first used K-fold cross validation to determine the K with the lowest average RMSE.
 
 
 ```{r, echo = FALSE}
@@ -186,16 +187,18 @@ opt_k = opt_err[1,1]
 
 cat("As can be seen above, the K with the lowest average RMSE in this model is", opt_k,". As this is the most optimal RMSE, we will then use it to model price given mileage. ")
 ```
-```{r, include = FALSE}
+```{r, include = FALSE, error = FALSE}
 three_fifty_knn_opt = knnreg(price ~ mileage, k=opt_k, data = three_fiftys)
 three_fiftys = three_fiftys %>% 
   mutate(three_fifty_pred = predict(three_fifty_knn_opt, three_fiftys))
 mileage_plot = ggplot(data = three_fiftys) +
   geom_point(aes(x=mileage, y = price), alpha = 0.2)
 ```
-The predicted values in this model 
+
+At this value of K, the model predicts the following prices of cars with a 350 trim given their mileage: 
+
 ```{r, echo = FALSE}
-mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='red', size=1.5) + 
+mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='purple', size=1.5) + 
   labs( title = "Estimated Price Given Mileage vs. Actual Price",
         y = "Price",
         x = "Mileage")
@@ -226,12 +229,14 @@ ggplot(AMG_cv_grid) +
   scale_x_log10()
 ```
 
-```{r, include=TRUE}
+```{r, echo=FALSE, error = FALSE, message = FALSE}
 AMG_opt_err = AMG_cv_grid[which.min(AMG_cv_grid$err), ]
 AMG_opt_k = AMG_opt_err[1,1]
 
 cat("In this case, the K with the lowest average RMSE in this model is", AMG_opt_k,". We will then use it to model price given mileage for cars with an AMG trim. ")
 ```
+
+The estimated price given mileage at that K is:
 
 ```{r, include = FALSE}
 AMG_knn_opt = knnreg(price ~ mileage, k=AMG_opt_k, data = AMG)
@@ -243,13 +248,12 @@ AMG_mileage_plot = ggplot(data = AMG) +
 
 ```{r, echo = FALSE}
 
-AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='red', size=1.5) +
+AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='blue', size=1.5) +
    labs( title = "Estimated Price Given Mileage vs. Actual Price",
         y = "Price",
         x = "Mileage")
 
 
 ```
-```{r echo = FALSE}
-cat("The AMG trim has the greater optimal value of K, being" , AMG_opt_k,"versus the 350's optimal value of", opt_k, ". One potential explanation may be that there are more cars with an AMG trim, 1,413, compared to the 416 cars with a 350 trim. Since the 350 has less datapoints, it would take a relatively lower K to introduce greater bias into the model when compared to the AMG trim (since a greater K would 'cover' more datapoints). Balancing variance and bias in an optimal manner would then require choosing a smaller K compared to AMG, which has a greater amount of datapoints.")
-```
+
+The AMG trim has the greater optimal value of K compared to the 350 trim. One potential explanation may be that there are more cars with an AMG trim, 1,413, compared to the 416 cars with a 350 trim. Since the 350 has less datapoints, it would take a relatively lower K to introduce greater bias into the model when compared to the AMG trim (since a greater K would 'cover' more datapoints). Balancing variance and bias in an optimal manner would then require choosing a smaller K compared to AMG, which has a greater amount of datapoints.
