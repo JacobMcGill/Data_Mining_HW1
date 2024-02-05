@@ -1,9 +1,8 @@
 ---
-title: "HW1"
-output:
-  word_document: default
-  pdf_document: default
-date: "2024-01-27"
+title: "ECO 395M Homework 1: Daniel Oliner, Musab Alquwaee, Jacob McGill"
+author: "Daniel Oliner, Musab Alquwaee, Jacob McGill"
+output: md_document
+date: "2024-02-04"
 ---
 
 ```{r setup, include=FALSE}
