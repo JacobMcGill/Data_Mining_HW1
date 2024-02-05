@@ -107,63 +107,46 @@ ggplot(significant_disruption_rate_by_carrier, aes(x = reorder(UniqueCarrier, -S
 
 #Question 2
 
-```{r, include=FALSE}
-top_20 = read.csv('C://Users/jacob/Downloads/olympics_top20.csv', header=TRUE)
-```
-A)
-The 95th percentile for women's height across all Athletics 
-```{r}
-women_height_95pct = top_20 %>%
-  filter(sex == "F", sport == "Athletics") %>%
-  summarize(q95_height = quantile(height, 0.95))
-print(women_height_95pct)
+## 2A) 95th Percentile of Heights for Female Athletics Competitors 
+
+```{r, echo=FALSE}
+olympics <- read.csv('C://Users/jacob/Downloads/olympics_top20.csv', header=TRUE)
+olympics_athletics = olympics %>% filter(sport=="Athletics", sex=="F")
+athletics_q95_height <- quantile(olympics_athletics$height, 0.95, na.rm = TRUE)
+cat("The 95th percentile of heights for female competitors in Athletics events is:", athletics_q95_height, "centimeters\n")
 ```
 
-B)  The womens' event with the largest variation in height is the Rowing Women's Coxed Fours, as seen below.
+## 2B) Women's events with the greatest variability in competitor's heights across the entire history of the Olympics, as measured by the standard deviation?
 
-```{r, include=FALSE}
-height_var = top_20 %>%
-  filter(sex == "F") %>%
+```{r 3B, message=FALSE, echo=FALSE}
+
+greateset_variability = olympics %>%
+  filter(sex=="F") %>%
   group_by(event) %>%
-  summarize(height_variation = sd(height)) %>%
-  filter(height_variation != "NA") %>%
-  arrange(desc(height_variation))
+  summarize(sd_height = sd(height))%>%
+  arrange(desc(sd_height))
+
+head(greateset_variability,1)
+
+
 ```
 
-```{r, include = TRUE}
-height_var %>%
-  head(1)
-```
 
-C) A graph of the change in age is show below
-```{r, include=TRUE}
-sum_age = top_20 %>%
-  filter(sport == "Swimming") %>%
-  group_by(year, sex) %>%
-  summarize(avg_age = mean(age))
-ggplot(sum_age, aes(x = year, y = avg_age, color = sex)) +
+
+## 2C) Average Age of Olympic Swimmers Over Time
+
+```{r, echo=FALSE}
+olympics_swimming = olympics %>% filter(sport=="Swimming")
+average_age_swimming <- olympics_swimming %>% group_by(year, sex) %>% summarize(AvgAge = mean(age, na.rm = TRUE))
+ggplot(average_age_swimming, aes(x = year, y = AvgAge, color = sex)) +
   geom_line() +
-  labs(title = "Average Age by Gender Over the Years",
+  labs(title = "Average Age of Olympic Swimmers Over Time",
        x = "Year",
-       y = "Average Age",
-       color = "Gender")
+       y = "Average Age")
+       
+cat("The plot illustrates how the average age of Olympic swimmers has changed over time, stratified by gender.")
 ```
 
-```{r}
-male_age = top_20 %>%
-  filter(sport == "Swimming" & sex == "M") %>%
-  group_by(year) %>%
-  summarize(avg_age = mean(age))
-female_age = top_20 %>%
-  filter(sport == "Swimming" & sex == "F") %>%
-  group_by(year) %>%
-  summarize(avg_age = mean(age))
-ggplot + geom_line()
-```
-
-```{r, include=FALSE}
-
-```
 # Question 3
 ```{r, include=FALSE}
 sclass = read.csv('C://Users/jacob/Downloads/sclass.csv', header=TRUE)
