@@ -48,16 +48,10 @@ the K with the lowest average RMSE.
 
 ![](Eco395m_HW1_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
-    ## As can be seen above, the K with the lowest average RMSE in this model is 15 . As this is the most optimal RMSE, we will then use it to model price given mileage.
+    ## As can be seen above, the K with the lowest average RMSE in this model is 18 . As this is the most optimal RMSE, we will then use it to model price given mileage.
 
 At this value of K, the model predicts the following prices of cars with
 a 350 trim given their mileage:
-
-    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-    ## ℹ Please use `linewidth` instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 ![](Eco395m_HW1_files/figure-markdown_strict/unnamed-chunk-11-1.png)
 
@@ -67,9 +61,15 @@ We can repeat this process for the AMG trim.
 
 ![](Eco395m_HW1_files/figure-markdown_strict/unnamed-chunk-13-1.png)
 
-    ## In this case, the K with the lowest average RMSE in this model is 61 . We will then use it to model price given mileage for cars with an AMG trim.
+    ## In this case, the K with the lowest average RMSE in this model is 60 . We will then use it to model price given mileage for cars with an AMG trim.
 
 The estimated price given mileage at that K is:
+
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
 ![](Eco395m_HW1_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 

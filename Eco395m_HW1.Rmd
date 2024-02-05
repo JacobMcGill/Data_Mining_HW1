@@ -199,7 +199,7 @@ mileage_plot = ggplot(data = three_fiftys) +
 At this value of K, the model predicts the following prices of cars with a 350 trim given their mileage: 
 
 ```{r, echo = FALSE, echo = FALSE, message = FALSE}
-mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='purple', size=1.5) + 
+mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='purple', linewidth=1.5) + 
   labs( title = "Estimated Price Given Mileage vs. Actual Price",
         y = "Price",
         x = "Mileage")
