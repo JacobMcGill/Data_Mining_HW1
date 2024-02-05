@@ -23,7 +23,7 @@ library(foreach)
 library(kknn)
 ```
 
-#Question 1
+# Question 1
 
 ```{r,include=FALSE}
 
@@ -88,7 +88,8 @@ ggplot(cancellation_rate_by_carrier, aes(x = reorder(UniqueCarrier, -Cancellatio
 
 
 ```
-#Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
+
+# Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
 
 ```{r, echo=FALSE}
 
@@ -100,11 +101,11 @@ ggplot(significant_disruption_rate_by_carrier, aes(x = reorder(UniqueCarrier, -S
 
 ```
 
-#After defining a new variable for a "Signficant Disruption" that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS. 
+# After defining a new variable for a "Signficant Disruption" that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS. 
 
 
 
-#Question 2
+# Question 2
 
 ## 2A) 95th Percentile of Heights for Female Athletics Competitors 
 
@@ -167,7 +168,7 @@ threefifty_cv_grid = foreach(k = threefifty_k_grid, .combine='rbind') %dopar% {
   c(k=k, err = mean(errs))
 } %>% as.data.frame
 ```
-##350 Trim
+## 350 Trim
 To predict the price of a car with a 350 trim given its mileage using K-nearest neighbors, we can first use K-fold cross validation to determine the K with the lowest average RMSE.
 
 
@@ -201,7 +202,7 @@ mileage_plot + geom_line(aes(x = mileage, y = three_fifty_pred), color='red', si
 
 ```
 
-##AMG Trim
+## AMG Trim
 We can repeat this process for the AMG trim.
 
 ```{r, include = FALSE}

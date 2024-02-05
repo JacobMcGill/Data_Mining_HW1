@@ -1,22 +1,16 @@
-\#Question 1
+# Question 1
 
 ## 1) Data Visualization: Flights at ABIA
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-3-1.png)![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-3-2.png)
-\#Focusing on departures out of Austin, these figures provide insights
-into arrival delays and cancellation rate by airline. I chose to focus
-on arrival delays specifically because I consider this the superior
-measure of passenger experience, given that departure delays can often
-be made up for (at least in part) in the air.
+
+# Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-4-1.png)
 
-\#After defining a new variable for a “Signficant Disruption” that
-represents a flight that is either cancelled or delayed by 2+ hours,
-this visualization shows the Significant Disruption Rate by carrier for
-flights out of AUS.
+# After defining a new variable for a “Signficant Disruption” that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS.
 
-\#Question 2
+# Question 2
 
 ## 2A) 95th Percentile of Heights for Female Athletics Competitors
 
@@ -40,13 +34,15 @@ flights out of AUS.
 
 # Question 3
 
-\##350 Trim To predict the price of a car with a 350 trim given its
-mileage using K-nearest neighbors, we can first use K-fold cross
-validation to determine the K with the lowest average RMSE.
+## 350 Trim
+
+To predict the price of a car with a 350 trim given its mileage using
+K-nearest neighbors, we can first use K-fold cross validation to
+determine the K with the lowest average RMSE.
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
-    ## As can be seen above, the K with the lowest average RMSE in this model is 18 . As this is the most optimal RMSE, we will then use it to model price given mileage.
+    ## As can be seen above, the K with the lowest average RMSE in this model is 15 . As this is the most optimal RMSE, we will then use it to model price given mileage.
 
 The predicted values in this model
 
@@ -58,7 +54,9 @@ The predicted values in this model
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-11-1.png)
 
-\##AMG Trim We can repeat this process for the AMG trim.
+## AMG Trim
+
+We can repeat this process for the AMG trim.
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-13-1.png)
 
@@ -67,8 +65,8 @@ The predicted values in this model
 
     cat("In this case, the K with the lowest average RMSE in this model is", AMG_opt_k,". We will then use it to model price given mileage for cars with an AMG trim. ")
 
-    ## In this case, the K with the lowest average RMSE in this model is 48 . We will then use it to model price given mileage for cars with an AMG trim.
+    ## In this case, the K with the lowest average RMSE in this model is 64 . We will then use it to model price given mileage for cars with an AMG trim.
 
 ![](HW1-First-Draft_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 
-    ## The AMG trim has the greater optimal value of K, being 48 versus the 350's optimal value of 18 . One potential explanation may be that there are more cars with an AMG trim, 1,413, compared to the 416 cars with a 350 trim. Since the 350 has less datapoints, it would take a relatively lower K to introduce greater bias into the model when compared to the AMG trim (since a greater K would 'cover' more datapoints). Balancing variance and bias in an optimal manner would then require choosing a smaller K compared to AMG, which has a greater amount of datapoints.
+    ## The AMG trim has the greater optimal value of K, being 64 versus the 350's optimal value of 15 . One potential explanation may be that there are more cars with an AMG trim, 1,413, compared to the 416 cars with a 350 trim. Since the 350 has less datapoints, it would take a relatively lower K to introduce greater bias into the model when compared to the AMG trim (since a greater K would 'cover' more datapoints). Balancing variance and bias in an optimal manner would then require choosing a smaller K compared to AMG, which has a greater amount of datapoints.
