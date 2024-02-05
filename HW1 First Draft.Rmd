@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, include=FALSE}
+#All relevant libraries for the assignment
 library(tidyverse)
 library(mosaic)
 library(ggplot2)
@@ -22,6 +23,87 @@ library(parallel)
 library(foreach)
 library(kknn)
 ```
+
+#Question 1
+
+```{r,include=FALSE}
+
+ABIA <- read.csv("C://Users/jacob/Downloads/ABIA.csv", header = TRUE)
+
+aus_departures = ABIA %>% filter(Origin == "AUS")
+aus_departures_bycarrier = aus_departures %>% group_by(UniqueCarrier)
+
+aus_departures_summary = aus_departures_bycarrier %>% 
+  summarize(AvgDepDelay = mean(DepDelay, na.rm = TRUE)) %>%
+  arrange(desc(AvgDepDelay))
+
+aus_arrdelay_summary = aus_departures_bycarrier %>% 
+  summarize(AvgArrDelay = mean(ArrDelay, na.rm = TRUE)) %>%
+  arrange(desc(AvgArrDelay))
+
+aus_cancellations = aus_departures %>% filter(Cancelled == 1)
+
+cancellations_by_carrier = aus_cancellations %>% 
+  group_by(UniqueCarrier) %>%
+  summarize(NumCancellations = n())
+
+total_flights_by_carrier = aus_departures_bycarrier %>% summarize(TotalFlights = n())
+aus_cancellations = aus_departures %>% filter(Cancelled == 1)
+
+cancellations_by_carrier = aus_cancellations %>% 
+  group_by(UniqueCarrier) %>%
+  summarize(NumCancellations = n())
+
+cancellation_rate_by_carrier = merge(cancellations_by_carrier, total_flights_by_carrier, by = "UniqueCarrier")
+cancellation_rate_by_carrier$CancellationRate = (cancellation_rate_by_carrier$NumCancellations / cancellation_rate_by_carrier$TotalFlights) * 100
+
+aus_departures_with_disruption = aus_departures %>%
+  mutate(SignificantDisruption = ifelse(Cancelled == 1 | ArrDelay >= 120, 1, 0))
+
+significant_disruption_by_carrier = aus_departures_with_disruption %>%
+  filter(SignificantDisruption == 1) %>%
+  group_by(UniqueCarrier) %>%
+  summarize(NumSignificantDisruption = n())
+
+significant_disruption_rate_by_carrier = merge(significant_disruption_by_carrier, total_flights_by_carrier, by = "UniqueCarrier")
+significant_disruption_rate_by_carrier$SignificantDisruptionRate = 
+  (significant_disruption_rate_by_carrier$NumSignificantDisruption / significant_disruption_rate_by_carrier$TotalFlights) * 100
+```
+
+## 1) Data Visualization: Flights at ABIA
+
+```{r, echo=FALSE}
+
+ggplot(aus_arrdelay_summary, aes(x = reorder(UniqueCarrier, -AvgArrDelay), y = AvgArrDelay)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Average Arrival Delay by Carrier (AUS Departures)",
+       x = "Carrier",
+       y = "Average Arrival Delay (minutes)")
+
+ggplot(cancellation_rate_by_carrier, aes(x = reorder(UniqueCarrier, -CancellationRate), y = CancellationRate)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  labs(title = "Cancellation Rate by Carrier (AUS Departures)",
+       x = "Carrier",
+       y = "Cancellation Rate (%)")
+
+
+
+```
+#Focusing on departures out of Austin, these figures provide insights into arrival delays and cancellation rate by airline. I chose to focus on arrival delays specifically because I consider this the superior measure of passenger experience, given that departure delays can often be made up for (at least in part) in the air.
+
+```{r, echo=FALSE}
+
+ggplot(significant_disruption_rate_by_carrier, aes(x = reorder(UniqueCarrier, -SignificantDisruptionRate), y = SignificantDisruptionRate)) +
+  geom_bar(stat = "identity", fill = "purple") +
+  labs(title = "Significant Disruption Rate by Carrier (AUS Departures)",
+       x = "Carrier",
+       y = "Significant Disruption Rate (%)")
+
+```
+
+#After defining a new variable for a "Signficant Disruption" that represents a flight that is either cancelled or delayed by 2+ hours, this visualization shows the Significant Disruption Rate by carrier for flights out of AUS. 
+
+
 
 #Question 2
 
