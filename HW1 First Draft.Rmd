@@ -149,6 +149,7 @@ cat("The plot illustrates how the average age of Olympic swimmers has changed ov
 
 # Question 3
 ```{r, include=FALSE}
+#Load in car data
 sclass = read.csv('C://Users/jacob/Downloads/sclass.csv', header=TRUE)
 
 #Filter data into 350 and 63 AMG sets
@@ -156,31 +157,32 @@ three_fiftys = sclass %>%
   filter(trim == "350")
 AMG = sclass %>%
   filter(trim == "63 AMG")
-#Create training and test splits for both
-three_fifty_split = initial_split(three_fiftys, prop=0.8)
-three_fifty_train = training(three_fifty_split)
-three_fifty_test = testing(three_fifty_split)
+#Create training k-folds
 K_folds = 10
 threefifty_folds = crossv_kfold(three_fiftys, k=K_folds)
-k_grid = c(2, 3, 4, 5, 6, 7, 8,9,10, 11, 12, 15, 16, 17, 18, 20, 22, 25, 27, 30, 32, 35, 37, 40, 45,
+threefifty_k_grid = c(2, 3, 4, 5, 6, 7, 8,9,10, 11, 12, 15, 16, 17, 18, 19, 20, 22, 25, 27, 30, 32, 35, 37, 40, 45,
            50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250, 300)
-cv_grid = foreach(k = k_grid, .combine='rbind') %dopar% {
+threefifty_cv_grid = foreach(k = threefifty_k_grid, .combine='rbind') %dopar% {
   models = map(threefifty_folds$train, ~ knnreg(price ~ mileage, k=k, data = ., use.all=FALSE))
   errs = map2_dbl(models, threefifty_folds$test, modelr::rmse)
   c(k=k, err = mean(errs), std_err = sd(errs)/sqrt(K_folds))
 } %>% as.data.frame
 ```
+##350 Trim
+To predict the price of a car with a 350 trim given its mileage using K-nearest neighbors, we can first use K-fold cross validation to determine the K with the lowest average RMSE.
 
-```{r, include = TRUE}
-ggplot(cv_grid) + 
+
+```{r, echo = FALSE}
+ggplot(threefifty_cv_grid) + 
   geom_line(aes(x=k, y=err)) + 
   geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
   scale_x_log10()
 ```
-```{r, include=TRUE, error = FALSE}
+```{r, echo=FALSE, error = FALSE}
 opt_err = cv_grid[which.min(cv_grid$err), ]
 opt_k = opt_err[1,1]
-opt_k
+
+cat("The K with the lowest average RMSE in this model is", opt_k,". Looking at the ")
 ```
 ```{r, include = FALSE}
 three_fifty_knn_opt = knnreg(price ~ mileage, k=opt_k, data = three_fiftys)
@@ -190,7 +192,7 @@ mileage_plot = ggplot(data = three_fiftys) +
   geom_point(aes(x=mileage, y = price), alpha = 0.2)
 ```
 
-```{r, include = TRUE}
+```{r, echo = FALSE}
 #mileage_plot = ggplot(data = three_fiftys) +
  # geom_point(aes(x=mileage, y = price), alpha = 0.2) 
   #ylim(7000, 20000) 
@@ -212,7 +214,7 @@ AMG_cv_grid = foreach(k = k_grid, .combine='rbind') %dopar% {
 } %>% as.data.frame
 ```
 
-```{r, include = TRUE}
+```{r, echo = FALSE}
 ggplot(AMG_cv_grid) + 
   geom_line(aes(x=k, y=err)) + 
   geom_errorbar(aes(x=k, ymin = err-std_err, ymax = err+std_err)) + 
@@ -233,7 +235,7 @@ AMG_mileage_plot = ggplot(data = AMG) +
   geom_point(aes(x=mileage, y = price), alpha = 0.2)
 ```
 
-```{r, include = TRUE}
+```{r, echo = FALSE}
 
 AMG_mileage_plot + geom_line(aes(x = mileage, y = AMG_pred), color='red', size=1.5)
 
